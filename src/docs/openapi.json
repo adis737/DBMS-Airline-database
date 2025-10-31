@@ -1,0 +1,47 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "ADBMS API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    { "url": "http://localhost:3000" }
+  ],
+  "paths": {
+    "/health": {
+      "get": { "summary": "Health check", "responses": { "200": { "description": "OK" } } }
+    },
+    "/api/auth/login": {
+      "post": {
+        "summary": "Login",
+        "requestBody": { "required": true, "content": { "application/json": { "schema": {"type":"object","properties":{"username":{"type":"string"},"password":{"type":"string"}},"required":["username","password"] } } } },
+        "responses": { "200": { "description": "JWT token" } }
+      }
+    },
+    "/api/flights": {
+      "get": {
+        "summary": "List flights",
+        "parameters": [
+          {"name":"date","in":"query","schema":{"type":"string","format":"date"}},
+          {"name":"airline","in":"query","schema":{"type":"string"}},
+          {"name":"origin","in":"query","schema":{"type":"string"}},
+          {"name":"destination","in":"query","schema":{"type":"string"}}
+        ],
+        "responses": { "200": { "description": "Flights list" } }
+      }
+    },
+    "/api/bookings": {
+      "post": {
+        "summary": "Create booking (requires auth)",
+        "requestBody": { "required": true, "content": { "application/json": { "schema": {"type":"object","properties":{"flight":{"type":"string"},"passenger":{"type":"string"},"seatClass":{"type":"string"},"payment":{"type":"object","properties":{"amount":{"type":"number"}}},"travelDate":{"type":"string","format":"date-time"}},"required":["flight","passenger","seatClass","payment","travelDate"] } } } },
+        "responses": { "201": { "description": "Created" } },
+        "security": [{ "bearerAuth": [] }]
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": { "type": "http", "scheme": "bearer", "bearerFormat": "JWT" }
+    }
+  }
+}
