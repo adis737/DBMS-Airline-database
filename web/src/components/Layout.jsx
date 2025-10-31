@@ -9,16 +9,18 @@ export default function Layout() {
 	}
 	return (
 		<div>
-			<header className="glass" style={{ display:'flex', gap:16, alignItems:'center', padding:'16px 20px', position:'sticky', top:0, zIndex:10 }}>
+			<header className="glass" style={{ display:'flex', gap:16, alignItems:'center', padding:'16px 20px', position:'sticky', top:0, zIndex:10, flexWrap:'wrap' }}>
 				<Link to="/get-started" style={{ fontWeight: 800, fontSize: '1.25rem' }} className="gradient-text">Aether Aviation</Link>
-				<nav style={{ display:'flex', gap:16, fontSize:'1.05rem' }}>
-					<Link to="/flights">Flights</Link>
-					<Link to="/bookings">My Bookings</Link>
-					<Link to="/history">History</Link>
-					<Link to="/assistant">Assistant</Link>
-					<Link to="/passenger">Passenger</Link>
-					<Link to="/profile">Profile</Link>
-				</nav>
+				{token && (
+					<nav style={{ display:'flex', gap:16, fontSize:'1.05rem', flexWrap:'wrap' }}>
+						<Link to="/flights">Flights</Link>
+						<Link to="/bookings">My Bookings</Link>
+						<Link to="/history">History</Link>
+						<Link to="/assistant">Assistant</Link>
+						<Link to="/passenger">Passenger</Link>
+						<Link to="/profile">Profile</Link>
+					</nav>
+				)}
 				<div style={{ marginLeft:'auto' }}>
 					{token ? (
 						<button onClick={logout}>Logout</button>
@@ -27,7 +29,7 @@ export default function Layout() {
 					)}
 				</div>
 			</header>
-			<main style={{ maxWidth: 1280, margin: '0 auto' }}>
+			<main style={{ maxWidth: 1280, margin: '0 auto', padding:'0 12px' }}>
 				<Outlet />
 			</main>
 		</div>

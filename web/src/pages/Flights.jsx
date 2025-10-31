@@ -163,13 +163,13 @@ useEffect(()=>{ (async()=>{
 		<div style={{ maxWidth: 1000, margin: '20px auto', padding:'0 12px' }}>
 			<h2>Find Flights</h2>
 			<div className="glass" style={{ padding:12, borderRadius:8, margin:'8px 0' }}>
-				<div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:8 }}>
+				<div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:8, flexWrap:'wrap', gap:8 }}>
 					<strong>Featured flights (live price demo)</strong>
-					<span>Today: {new Date().toLocaleDateString()}</span>
+					<span style={{ fontSize:'0.9rem', opacity:0.8 }}>Today: {new Date().toLocaleDateString()}</span>
 				</div>
 				<div style={{ display:'flex', gap:12, flexWrap:'wrap' }}>
 					{featured.map(f => (
-						<div key={f.id} style={{ background:'rgba(17,24,39,0.9)', border:'1px solid rgba(255,255,255,0.12)', color:'rgba(255,255,255,0.92)', borderRadius:8, padding:12, minWidth:240 }}>
+						<div key={f.id} style={{ background:'rgba(255,255,255,0.95)', border:'1px solid rgba(0,0,0,0.1)', borderRadius:8, padding:12, minWidth:240, flex: '1 1 280px', maxWidth:'100%' }}>
 							<div style={{ fontWeight:600 }}>{f.airline} · {f.flightNumber}</div>
 							<div style={{ margin:'4px 0' }}>{f.origin} → {f.destination}</div>
 							<div style={{ margin:'4px 0' }}>Date: {f.date}</div>
@@ -199,7 +199,7 @@ useEffect(()=>{ (async()=>{
 				<thead><tr><th align="left">Flight</th><th align="left">Airline</th><th align="left">Route</th><th align="left">Depart</th><th align="left">Seats</th><th></th></tr></thead>
 				<tbody>
 					{flights.map(f=> (
-						<tr key={f._id} style={{ borderTop:'1px solid #eee' }}>
+						<tr key={f._id} style={{ borderTop:'1px solid rgba(0,0,0,0.1)' }}>
 							<td>{f.flightNumber}</td>
 							<td>{f.airline}</td>
 							<td>{f.origin} → {f.destination}</td>
