@@ -140,7 +140,7 @@ useEffect(()=>{ (async()=>{
 				alert('Booked (demo): ' + bookingId)
 				return
 			}
-			const payload = { flight: flight._id, passenger: passengerId, seatClass, payment: { amount, status: 'PAID' }, travelDate: flight.departureTime }
+			const payload = { flight: flight._id, passenger: passengerId, seatClass, payment: { amount, status: 'PAID', method: 'CARD' }, travelDate: flight.departureTime }
 			const res = await api.post('/api/bookings', payload)
 			const saved = {
 				bookingId: res.data.bookingId,

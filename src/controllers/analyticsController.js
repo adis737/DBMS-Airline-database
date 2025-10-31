@@ -28,8 +28,17 @@ async function mostBookedFlights(req, res, next) {
 
 async function revenue(req, res, next) {
 	try {
+		// Also include bookings with payment.status not set but payment.amount exists
 		const result = await Booking.aggregate([
-			{ $match: { 'payment.status': 'PAID' } },
+			{ 
+				$match: { 
+					$or: [
+						{ 'payment.status': 'PAID' },
+						{ 'payment.amount': { $exists: true, $gt: 0 } }
+					],
+					status: { $ne: 'CANCELLED' }
+				} 
+			},
 			{ $group: { _id: null, totalRevenue: { $sum: '$payment.amount' }, count: { $sum: 1 } } },
 		]);
 		res.json(result[0] || { totalRevenue: 0, count: 0 });

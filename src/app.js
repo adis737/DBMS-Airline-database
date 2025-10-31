@@ -23,9 +23,13 @@ app.use(morgan('dev'));
 
 const apiLimiter = rateLimit({
 	windowMs: 15 * 60 * 1000,
-	max: 100,
+	max: 1000, // Increased for admin operations
 	standardHeaders: true,
 	legacyHeaders: false,
+	skip: (req) => {
+		// Skip rate limiting for health checks
+		return req.path === '/health';
+	}
 });
 app.use('/api', apiLimiter);
 
