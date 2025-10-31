@@ -1,7 +1,8 @@
 import axios from 'axios';
 
+const fallbackBase = 'https://dbms-airline-database-2.onrender.com'
 const api = axios.create({
-	baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000',
+	baseURL: import.meta.env.VITE_API_BASE_URL || fallbackBase,
 });
 
 api.interceptors.request.use((config) => {
