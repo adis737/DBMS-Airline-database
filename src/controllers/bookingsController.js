@@ -1,5 +1,7 @@
 const Booking = require('../models/Booking');
 const Flight = require('../models/Flight');
+const User = require('../models/User');
+const Passenger = require('../models/Passenger');
 
 async function createBooking(req, res, next) {
 	const session = await Booking.startSession();
@@ -28,7 +30,28 @@ async function createBooking(req, res, next) {
 
 async function getBookings(req, res, next) {
 	try {
-		const bookings = await Booking.find().sort({ createdAt: -1 });
+		const user = req.user;
+		let bookings;
+		
+		// If user is STAFF or ADMIN, show all bookings
+		if (user.roles && (user.roles.includes('STAFF') || user.roles.includes('ADMIN'))) {
+			bookings = await Booking.find().sort({ createdAt: -1 });
+		} else {
+			// For regular USER, show only their own bookings
+			// Find passenger by user's email
+			const userDoc = await User.findById(user.sub);
+			if (!userDoc) return res.status(404).json({ error: 'User not found' });
+			
+			const passenger = await Passenger.findOne({ email: userDoc.email });
+			if (!passenger) {
+				// No passenger yet, return empty array
+				return res.json([]);
+			}
+			
+			// Filter bookings by passenger ID
+			bookings = await Booking.find({ passenger: passenger._id }).sort({ createdAt: -1 });
+		}
+		
 		res.json(bookings);
 	} catch (err) { next(err); }
 }

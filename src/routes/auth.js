@@ -3,15 +3,14 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const Joi = require('joi');
 const User = require('../models/User');
+const Passenger = require('../models/Passenger');
 const { validateBody } = require('../middleware/validate');
 
 const strongPassword = Joi.string()
 	.min(8)
 	.max(72)
-	.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,}$/)
 	.messages({
 		'string.min': 'Password must be at least 8 characters',
-		'string.pattern.base': 'Password must include upper, lower, number, and special character',
 	});
 
 const registerSchema = Joi.object({
@@ -33,7 +32,18 @@ router.post('/register', validateBody(registerSchema), async (req, res, next) =>
 		if (exists) return res.status(409).json({ error: 'User already exists' });
 		const passwordHash = await bcrypt.hash(password, 10);
 		const user = await User.create({ username, email, passwordHash, roles });
-		res.status(201).json({ id: user._id, username: user.username, email: user.email, roles: user.roles });
+		
+		// Auto-create passenger for new user
+		const nameParts = username.split(' ');
+		const firstName = nameParts[0] || username;
+		const lastName = nameParts.slice(1).join(' ') || 'User';
+		const passenger = await Passenger.create({
+			firstName,
+			lastName,
+			email: user.email
+		});
+		
+		res.status(201).json({ id: user._id, username: user.username, email: user.email, roles: user.roles, passengerId: passenger._id });
 	} catch (err) { next(err); }
 });
 
@@ -45,7 +55,22 @@ router.post('/login', validateBody(loginSchema), async (req, res, next) => {
 		const ok = await user.comparePassword(password);
 		if (!ok) return res.status(401).json({ error: 'Invalid credentials' });
 		const token = jwt.sign({ sub: user._id, username: user.username, roles: user.roles }, process.env.JWT_SECRET || 'devsecret', { expiresIn: '12h' });
-		res.json({ token });
+		
+		// Auto-create or find passenger for this user
+		let passenger = await Passenger.findOne({ email: user.email });
+		if (!passenger) {
+			// Split username for firstName/lastName or use username as firstName
+			const nameParts = username.split(' ');
+			const firstName = nameParts[0] || username;
+			const lastName = nameParts.slice(1).join(' ') || 'User';
+			passenger = await Passenger.create({
+				firstName,
+				lastName,
+				email: user.email
+			});
+		}
+		
+		res.json({ token, passengerId: passenger._id });
 	} catch (err) { next(err); }
 });
 

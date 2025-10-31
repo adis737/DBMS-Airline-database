@@ -113,6 +113,9 @@ thead th { background: rgba(0,0,0,0.03); font-weight: 600; }
   table { font-size: 0.9rem; }
   th, td { padding: 8px 6px; }
   button, input, select { font-size: 0.95rem; padding: 0.6em 1em; }
+  .hamburger { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 10px; background: rgba(255,255,255,0.9); }
+  .nav { display: none !important; }
+  .nav.open { display: flex !important; flex-direction: column; width: 100%; gap: 10px; padding-top: 8px; }
 }
 
 @media (max-width: 480px) {
@@ -122,4 +125,8 @@ thead th { background: rgba(0,0,0,0.03); font-weight: 600; }
   header { gap: 12px !important; }
   .glass { padding: 12px 16px !important; }
   table { display: block; overflow-x: auto; }
+}
+
+@media (min-width: 769px) {
+  .hamburger { display: none; }
 }

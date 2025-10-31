@@ -3,10 +3,10 @@ import api from '../api'
 import { useNavigate, Link } from 'react-router-dom'
 
 export default function Login() {
-	const [username, setUsername] = useState('admin')
-	const [password, setPassword] = useState('admin123')
+	const [username, setUsername] = useState('')
+	const [password, setPassword] = useState('')
 	const [mode, setMode] = useState('login')
-	const [email, setEmail] = useState('admin@example.com')
+	const [email, setEmail] = useState('')
 	const [error, setError] = useState('')
 	const navigate = useNavigate()
 
@@ -14,11 +14,18 @@ export default function Login() {
 		e.preventDefault()
 		setError('')
 		try {
+			let data;
 			if (mode === 'register') {
-				await api.post('/api/auth/register', { username, email, password })
+				data = await api.post('/api/auth/register', { username, email, password })
+				if (data.data?.passengerId) {
+					localStorage.setItem('passengerId', data.data.passengerId)
+				}
 			}
-			const { data } = await api.post('/api/auth/login', { username, password })
-			localStorage.setItem('token', data.token)
+			data = await api.post('/api/auth/login', { username, password })
+			localStorage.setItem('token', data.data.token)
+			if (data.data.passengerId) {
+				localStorage.setItem('passengerId', data.data.passengerId)
+			}
 			navigate('/flights')
 		} catch (err) {
 			const apiErr = err.response?.data
@@ -29,8 +36,6 @@ export default function Login() {
 			}
 		}
 	}
-
-	const passwordPattern = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*()_+\-=\\[\\]{};':\\\"\\|,.<>/?]).{8,}$"
 
 	return (
 		<div style={{ display:'grid', placeItems:'center', minHeight:'60vh' }}>
@@ -49,7 +54,7 @@ export default function Login() {
 					)}
 					<label>
 						<div>Password</div>
-						<input type="password" value={password} onChange={(e)=>setPassword(e.target.value)} required minLength={8} pattern={passwordPattern} title="Min 8 chars, include upper, lower, number, and special" />
+						<input type="password" value={password} onChange={(e)=>setPassword(e.target.value)} required minLength={8} />
 					</label>
 					<button type="submit">{mode==='login' ? 'Login' : 'Register & Login'}</button>
 				</form>
@@ -60,7 +65,7 @@ export default function Login() {
 					<Link to="/get-started">Back</Link>
 				</div>
 				{error && <p style={{ color:'salmon', marginTop:10 }}>{error}</p>}
-				<p style={{ color:'#cbd5e1', fontSize:12 }}>Password must be 8+ chars with upper, lower, number, and special.</p>
+				<p style={{ color:'#cbd5e1', fontSize:12 }}>Password must be at least 8 characters.</p>
 			</div>
 		</div>
 	)

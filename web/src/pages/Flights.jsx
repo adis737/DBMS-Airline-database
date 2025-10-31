@@ -42,6 +42,42 @@ useEffect(()=>{ (async()=>{
 
 	const suggestions = useMemo(()=>airports.map(a=>a.code), [airports])
 
+	function generateFakeFlights() {
+		const baseDate = params.date || new Date().toISOString().slice(0,10)
+		const routes = [
+			['JFK','LAX'], ['SFO','SEA'], ['ORD','ATL'], ['MIA','BOS'], ['DFW','DEN'],
+			['LAX','SEA'], ['SEA','SFO'], ['ATL','MIA'], ['BOS','ORD'], ['DEN','DFW']
+		]
+		const airlines = ['Demo Air','Sample Wings','OpenSky','Nimbus','Falcon']
+		const makeIso = (h, m) => new Date(`${baseDate}T${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:00`).toISOString()
+		const rand = (min,max)=> Math.floor(Math.random()*(max-min+1))+min
+		const demo = Array.from({ length: 20 }).map((_, i) => {
+			const [o,d] = routes[i % routes.length]
+			const airline = airlines[i % airlines.length]
+			const basePrice = 79 + (i*7) + rand(-10, 25)
+			return {
+				_id: `DEMO-${i+1}`,
+				isDemo: true,
+				airline,
+				flightNumber: `${airline.split(' ')[0].slice(0,2).toUpperCase()}${100 + i}`,
+				origin: o,
+				destination: d,
+				departureTime: makeIso(6 + (i%12), (i*13)%60),
+				seatClasses: [
+					{ class: 'ECONOMY', availableSeats: 15 - (i%7), price: Math.max(59, Math.round(basePrice)) },
+					{ class: 'BUSINESS', availableSeats: 6 - (i%3), price: Math.round(basePrice * 1.65) }
+				]
+			}
+		})
+		// filter by current params
+		return demo.filter(d => {
+			if (params.origin && d.origin !== params.origin) return false
+			if (params.destination && d.destination !== params.destination) return false
+			if (params.date && new Date(d.departureTime).toISOString().slice(0,10) !== params.date) return false
+			return true
+		})
+	}
+
 	async function search() {
 		setLoading(true); setError('')
 		try {
@@ -49,45 +85,17 @@ useEffect(()=>{ (async()=>{
 			let nextFlights = data.data
 			let nextTotal = data.total
 			if (!nextFlights || nextFlights.length === 0) {
-				// create 20 demo flights if API has none
-				const baseDate = params.date || new Date().toISOString().slice(0,10)
-				const routes = [
-					['JFK','LAX'], ['SFO','SEA'], ['ORD','ATL'], ['MIA','BOS'], ['DFW','DEN'],
-					['LAX','SEA'], ['SEA','SFO'], ['ATL','MIA'], ['BOS','ORD'], ['DEN','DFW']
-				]
-				const airlines = ['Demo Air','Sample Wings','OpenSky','Nimbus','Falcon']
-				const makeIso = (h, m) => new Date(`${baseDate}T${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:00`).toISOString()
-				const rand = (min,max)=> Math.floor(Math.random()*(max-min+1))+min
-				const demo = Array.from({ length: 20 }).map((_, i) => {
-					const [o,d] = routes[i % routes.length]
-					const airline = airlines[i % airlines.length]
-					const basePrice = 79 + (i*7) + rand(-10, 25)
-					return {
-						_id: `DEMO-${i+1}`,
-						isDemo: true,
-						airline,
-						flightNumber: `${airline.split(' ')[0].slice(0,2).toUpperCase()}${100 + i}`,
-						origin: o,
-						destination: d,
-						departureTime: makeIso(6 + (i%12), (i*13)%60),
-						seatClasses: [
-							{ class: 'ECONOMY', availableSeats: 15 - (i%7), price: Math.max(59, Math.round(basePrice)) },
-							{ class: 'BUSINESS', availableSeats: 6 - (i%3), price: Math.round(basePrice * 1.65) }
-						]
-					}
-				})
-				// filter by current params
-				const matches = demo.filter(d => {
-					if (params.origin && d.origin !== params.origin) return false
-					if (params.destination && d.destination !== params.destination) return false
-					if (params.date && new Date(d.departureTime).toISOString().slice(0,10) !== params.date) return false
-					return true
-				})
-				nextFlights = matches
-				nextTotal = matches.length
+				nextFlights = generateFakeFlights()
+				nextTotal = nextFlights.length
 			}
 			setFlights(nextFlights); setTotal(nextTotal)
-		} catch (e) { setError(e.response?.data?.error || e.message) }
+		} catch (e) {
+			// On error, show fake flights instead of error message
+			const fakeFlights = generateFakeFlights()
+			setFlights(fakeFlights)
+			setTotal(fakeFlights.length)
+			setError('') // Clear error so fake flights are shown
+		}
 		finally { setLoading(false) }
 	}
 

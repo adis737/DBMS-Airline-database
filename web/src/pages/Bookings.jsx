@@ -11,18 +11,30 @@ export default function Bookings() {
 
 	async function load() {
 		setLoading(true)
-    try {
-            const { data } = await api.get('/api/bookings')
-            const localDemo = JSON.parse(localStorage.getItem('demoBookings') || '[]')
-            const localSaved = JSON.parse(localStorage.getItem('savedBookings') || '[]')
-            setItems([ ...localSaved, ...localDemo, ...data ])
+		setError('')
+		try {
+			const { data } = await api.get('/api/bookings')
+			const localDemo = JSON.parse(localStorage.getItem('demoBookings') || '[]')
+			const localSaved = JSON.parse(localStorage.getItem('savedBookings') || '[]')
+			const allBookings = [...localSaved, ...localDemo, ...(data || [])]
+			setItems(allBookings)
 			// fetch flight details
-            const uniqueFlightIds = [...new Set([ ...localSaved, ...localDemo, ...data ].map(b => b.flight))]
+			const uniqueFlightIds = [...new Set(allBookings.map(b => b.flight).filter(Boolean))]
 			const entries = await Promise.all(uniqueFlightIds.map(async (id) => {
 				try { const f = await api.get(`/api/flights/${id}`); return [id, f.data] } catch { return [id, null] }
 			}))
 			setFlightsMap(Object.fromEntries(entries))
-		} catch (e) { setError(e.response?.data?.error || e.message) }
+		} catch (e) {
+			// On error, still show local bookings
+			const localDemo = JSON.parse(localStorage.getItem('demoBookings') || '[]')
+			const localSaved = JSON.parse(localStorage.getItem('savedBookings') || '[]')
+			setItems([...localSaved, ...localDemo])
+			if (e.response?.status === 403) {
+				setError('Access denied. Showing local bookings only.')
+			} else {
+				setError(e.response?.data?.error || e.message)
+			}
+		}
 		finally { setLoading(false) }
 	}
 

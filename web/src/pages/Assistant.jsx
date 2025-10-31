@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { askGemini } from '../gemini'
 
 const DEFAULT_PROMPT = 'You are an airline booking helper. Answer concisely about flights, airports, dates, and booking steps for this app. If a user asks for actions, describe how to do them within the app.'
-const DEFAULT_KEY = import.meta.env.VITE_GEMINI_API_KEY || 'AIzaSyBXzJeDDXahUjSvlKHYL07spFeYiUJyuR8'
+const DEFAULT_KEY = import.meta.env.VITE_GEMINI_API_KEY || 'AIzaSyCtQMo1AryV3zS-1HqeUsU8Qz0ig9S8PSk'
 
 export default function Assistant() {
 	const [apiKey] = useState(()=> localStorage.getItem('geminiKey') || DEFAULT_KEY)
@@ -10,6 +10,7 @@ export default function Assistant() {
 	const [messages, setMessages] = useState([{ role:'system', content: DEFAULT_PROMPT }])
 	const [loading, setLoading] = useState(false)
 	const [tts, setTts] = useState(true)
+	const [isSpeaking, setIsSpeaking] = useState(false)
 	const endRef = useRef(null)
 
 	useEffect(()=>{ endRef.current?.scrollIntoView({ behavior:'smooth' }) }, [messages])
@@ -22,15 +23,37 @@ export default function Assistant() {
 		setMessages(next); setLoading(true)
 		try {
 			const reply = await askGemini(apiKey, next.filter(m=>m.role!=='system'))
-			setMessages(m => [...m, { role:'assistant', content: reply }])
-			if (tts) { speak(reply) }
+			const cleanedReply = cleanText(reply)
+			setMessages(m => [...m, { role:'assistant', content: cleanedReply }])
+			if (tts) { speak(cleanedReply) }
 		} catch (e) {
 			setMessages(m => [...m, { role:'assistant', content: 'Error contacting Gemini: '+ e.message }])
 		} finally { setLoading(false) }
 	}
 
+	function cleanText(text) {
+		// Remove markdown asterisks and other markdown formatting
+		return text.replace(/\*\*/g, '').replace(/\*/g, '').replace(/#{1,6}\s/g, '').replace(/`/g, '').trim()
+	}
+
 	function speak(text) {
-		try { window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.rate = 1; window.speechSynthesis.speak(u) } catch {}
+		try {
+			window.speechSynthesis.cancel()
+			const cleaned = cleanText(text)
+			const u = new SpeechSynthesisUtterance(cleaned)
+			u.rate = 1
+			u.onstart = () => setIsSpeaking(true)
+			u.onend = () => setIsSpeaking(false)
+			u.onerror = () => setIsSpeaking(false)
+			window.speechSynthesis.speak(u)
+		} catch {}
+	}
+
+	function stopSpeech() {
+		try {
+			window.speechSynthesis.cancel()
+			setIsSpeaking(false)
+		} catch {}
 	}
 
 	function startVoice() {
@@ -52,7 +75,7 @@ export default function Assistant() {
 				<div style={{ maxHeight: 420, overflow:'auto', marginTop:10, padding:8, border:'1px solid rgba(255,255,255,0.12)', borderRadius:8 }}>
 					{messages.filter(m=>m.role!=='system').map((m, idx)=> (
 						<div key={idx} style={{ margin:'6px 0', textAlign: m.role==='user'?'right':'left' }}>
-							<div style={{ display:'inline-block', padding:'8px 10px', borderRadius:10, background: m.role==='user'?'rgba(59,130,246,0.2)':'rgba(17,24,39,0.7)' }}>
+							<div style={{ display:'inline-block', padding:'8px 10px', borderRadius:10, background: m.role==='user'?'rgba(59,130,246,0.2)':'rgba(240,244,248,0.9)' }}>
 								<div style={{ opacity:.8, fontSize:12 }}>{m.role==='user'?'You':'Assistant'}</div>
 								<div>{m.content}</div>
 							</div>
@@ -62,6 +85,7 @@ export default function Assistant() {
 				</div>
 				<div style={{ display:'flex', gap:8, marginTop:10 }}>
 					<input style={{ flex:1 }} value={input} onChange={e=>setInput(e.target.value)} placeholder="Ask about flights, routes, booking..." onKeyDown={e=>{ if(e.key==='Enter') send() }} />
+					{isSpeaking && <button onClick={stopSpeech} style={{ fontSize:'0.9rem', padding:'0.4em 0.8em' }}>Stop</button>}
 					<button onClick={startVoice}>🎤</button>
 					<button onClick={send} disabled={loading}>{loading?'Thinking...':'Send'}</button>
 				</div>
