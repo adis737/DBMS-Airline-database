@@ -105,13 +105,38 @@ export default function Admin() {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [authenticated])
 
-	async function saveFlight(flightData) {
-		try {
-			const token = localStorage.getItem('token')
-			if (!token) {
-				alert('You must be logged in with ADMIN or STAFF role to create/edit flights. Please login first.')
-				return
+	async function checkAdminAccess() {
+		const token = localStorage.getItem('token')
+		if (!token) {
+			const login = confirm('You need to login first to create/edit flights. Would you like to login as admin now?\n\nUsername: admin\nPassword: admin123')
+			if (login) {
+				try {
+					const { useNavigate } = await import('react-router-dom')
+					window.location.href = '/login?redirect=/admin'
+				} catch {
+					window.location.href = '/login'
+				}
 			}
+			return false
+		}
+		// Try to decode token to check roles (basic check)
+		try {
+			const payload = JSON.parse(atob(token.split('.')[1]))
+			const roles = payload.roles || []
+			if (!roles.includes('ADMIN') && !roles.includes('STAFF')) {
+				alert('You need ADMIN or STAFF role. Please login with an admin account.\n\nUsername: admin\nPassword: admin123')
+				return false
+			}
+		} catch {
+			// Token might be invalid, try anyway
+		}
+		return true
+	}
+
+	async function saveFlight(flightData) {
+		if (!await checkAdminAccess()) return
+		
+		try {
 			if (editingFlight) {
 				await api.put(`/api/flights/${editingFlight._id}`, flightData)
 			} else {
@@ -123,10 +148,14 @@ export default function Admin() {
 			await loadAnalytics() // Refresh analytics after flight change
 		} catch (e) {
 			const errorMsg = e.response?.data?.error || e.message
-			if (e.response?.status === 429) {
+			if (e.response?.status === 401) {
+				alert('Session expired. Please login again.\n\nUsername: admin\nPassword: admin123')
+				localStorage.removeItem('token')
+				window.location.href = '/login'
+			} else if (e.response?.status === 403 || errorMsg.includes('role') || errorMsg.includes('Forbidden')) {
+				alert('Permission denied: You need ADMIN or STAFF role. Please login with:\n\nUsername: admin\nPassword: admin123')
+			} else if (e.response?.status === 429) {
 				alert('Rate limit exceeded. Please wait a moment and try again.')
-			} else if (e.response?.status === 403 || errorMsg.includes('role')) {
-				alert('Permission denied: You need ADMIN or STAFF role. Current user roles may not have permission.')
 			} else {
 				alert('Error saving flight: ' + errorMsg)
 			}
@@ -134,32 +163,52 @@ export default function Admin() {
 	}
 
 	async function deleteFlight(id) {
+		if (!await checkAdminAccess()) return
 		if (!confirm('Delete this flight?')) return
 		try {
-			const token = localStorage.getItem('token')
-			if (!token) {
-				alert('You must be logged in with ADMIN role to delete flights.')
-				return
-			}
 			await api.delete(`/api/flights/${id}`)
 			await loadFlights()
 			await loadAnalytics()
 		} catch (e) {
 			const errorMsg = e.response?.data?.error || e.message
-			if (e.response?.status === 403 || errorMsg.includes('role')) {
-				alert('Permission denied: You need ADMIN role to delete flights.')
+			if (e.response?.status === 401) {
+				alert('Session expired. Please login again.\n\nUsername: admin\nPassword: admin123')
+				localStorage.removeItem('token')
+				window.location.href = '/login'
+			} else if (e.response?.status === 403 || errorMsg.includes('role') || errorMsg.includes('Forbidden')) {
+				alert('Permission denied: You need ADMIN role to delete flights.\n\nPlease login with:\nUsername: admin\nPassword: admin123')
 			} else {
 				alert('Error deleting flight: ' + errorMsg)
 			}
 		}
 	}
 
+	function checkHasAdminAccess() {
+		const token = localStorage.getItem('token')
+		if (!token) return false
+		try {
+			const payload = JSON.parse(atob(token.split('.')[1]))
+			const roles = payload.roles || []
+			return roles.includes('ADMIN') || roles.includes('STAFF')
+		} catch {
+			return false
+		}
+	}
+
 	function startEdit(flight) {
+		if (!checkHasAdminAccess()) {
+			alert('You need ADMIN or STAFF role to edit flights. Please login with:\n\nUsername: admin\nPassword: admin123')
+			return
+		}
 		setEditingFlight(flight)
 		setShowForm(true)
 	}
 
 	function startNew() {
+		if (!checkHasAdminAccess()) {
+			alert('You need ADMIN or STAFF role to create flights. Please login with:\n\nUsername: admin\nPassword: admin123')
+			return
+		}
 		setEditingFlight(null)
 		setShowForm(true)
 	}
@@ -196,11 +245,97 @@ export default function Admin() {
 		)
 	}
 
+	// Check user roles from JWT token
+	const token = localStorage.getItem('token')
+	let userRoles = []
+	let username = ''
+	try {
+		if (token) {
+			const payload = JSON.parse(atob(token.split('.')[1]))
+			userRoles = payload.roles || []
+			username = payload.username || ''
+		}
+	} catch {}
+
+	const hasAdminAccess = userRoles.includes('ADMIN') || userRoles.includes('STAFF')
+
 	return (
 		<div style={{ maxWidth: 1400, margin: '20px auto', padding: '0 12px' }}>
-			<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-				<h2>Admin Dashboard</h2>
-				<button onClick={logout}>Logout</button>
+			<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, flexWrap: 'wrap', gap: '12px' }}>
+				<div>
+					<h2>Admin Dashboard</h2>
+					{token ? (
+						<div style={{ fontSize: '14px', color: hasAdminAccess ? '#10b981' : '#ff9800' }}>
+							Logged in as: <strong>{username}</strong> 
+							{hasAdminAccess ? (
+								<span> ✓ (Roles: {userRoles.join(', ')})</span>
+							) : (
+								<span> ⚠️ (Roles: {userRoles.length > 0 ? userRoles.join(', ') : 'USER'} - No ADMIN/STAFF access)</span>
+							)}
+						</div>
+					) : (
+						<p style={{ fontSize: '14px', color: '#ff9800', marginTop: '4px' }}>
+							⚠️ Not logged in. <a href="/login" style={{ color: '#007bff' }}>Login here</a> with admin credentials to manage flights.
+						</p>
+					)}
+					{!hasAdminAccess && (
+						<div style={{ 
+							background: '#fff3cd', 
+							border: '1px solid #ffc107', 
+							borderRadius: '4px', 
+							padding: '12px', 
+							marginTop: '8px',
+							fontSize: '14px'
+						}}>
+							<strong>⚠️ Limited Access:</strong> To create/edit/delete flights, you need to login with ADMIN or STAFF role.<br/>
+							<strong>Username:</strong> admin<br/>
+							<strong>Password:</strong> admin123<br/>
+							<button 
+								onClick={async () => {
+									try {
+										const { data } = await api.post('/api/auth/login', { username: 'admin', password: 'admin123' })
+										localStorage.setItem('token', data.token)
+										alert('Logged in successfully! Reloading page...')
+										window.location.reload()
+									} catch (e) {
+										alert('Auto-login failed. Please go to /login page and login manually.\n\nError: ' + (e.response?.data?.error || e.message))
+									}
+								}}
+								style={{
+									marginTop: '8px',
+									padding: '6px 12px',
+									background: '#007bff',
+									color: 'white',
+									border: 'none',
+									borderRadius: '4px',
+									cursor: 'pointer'
+								}}
+							>
+								🔑 Quick Login as Admin
+							</button>
+							{' '}
+							<a href="/login" style={{ color: '#007bff', fontWeight: 'bold', marginLeft: '8px' }}>or go to login page</a>
+						</div>
+					)}
+				</div>
+				<div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+					{!hasAdminAccess && (
+						<a 
+							href="/login" 
+							style={{ 
+								padding: '8px 16px', 
+								background: '#007bff', 
+								color: 'white', 
+								textDecoration: 'none', 
+								borderRadius: '4px',
+								fontSize: '14px'
+							}}
+						>
+							Login as Admin
+						</a>
+					)}
+					<button onClick={logout}>Logout Admin Panel</button>
+				</div>
 			</div>
 
 			{/* Analytics Section */}
@@ -328,7 +463,14 @@ export default function Admin() {
 							</p>
 						)}
 					</div>
-					<button onClick={startNew}>+ Add Flight</button>
+					<button 
+						onClick={startNew}
+						disabled={!hasAdminAccess}
+						style={!hasAdminAccess ? { opacity: 0.6, cursor: 'not-allowed' } : {}}
+						title={!hasAdminAccess ? 'Login with ADMIN role to create flights' : ''}
+					>
+						+ Add Flight
+					</button>
 				</div>
 
 				{showForm && (
@@ -364,8 +506,31 @@ export default function Admin() {
 										))}
 									</td>
 									<td>
-										<button onClick={() => startEdit(f)} style={{ marginRight: 8, fontSize: '0.9rem' }}>Edit</button>
-										<button onClick={() => deleteFlight(f._id)} style={{ fontSize: '0.9rem' }}>Delete</button>
+										<button 
+											onClick={() => startEdit(f)} 
+											disabled={!hasAdminAccess}
+											style={{ 
+												marginRight: 8, 
+												fontSize: '0.9rem',
+												opacity: !hasAdminAccess ? 0.6 : 1,
+												cursor: !hasAdminAccess ? 'not-allowed' : 'pointer'
+											}}
+											title={!hasAdminAccess ? 'Login with ADMIN role to edit' : ''}
+										>
+											Edit
+										</button>
+										<button 
+											onClick={() => deleteFlight(f._id)} 
+											disabled={!hasAdminAccess}
+											style={{ 
+												fontSize: '0.9rem',
+												opacity: !hasAdminAccess ? 0.6 : 1,
+												cursor: !hasAdminAccess ? 'not-allowed' : 'pointer'
+											}}
+											title={!hasAdminAccess ? 'Login with ADMIN role to delete' : ''}
+										>
+											Delete
+										</button>
 									</td>
 								</tr>
 							))}

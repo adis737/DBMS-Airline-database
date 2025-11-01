@@ -6,9 +6,11 @@ const { auth } = require('../middleware/auth');
 const { requireRoles } = require('../middleware/rbac');
 
 router.post('/', auth(true), requireRoles('ADMIN', 'STAFF'), validateBody(flightCreate), controller.createFlight);
+router.get('/realtime', controller.getRealtimeFlights);
 router.get('/', validateQuery(flightQuery), controller.getFlights);
 router.get('/:id', controller.getFlightById);
 router.put('/:id', auth(true), requireRoles('ADMIN', 'STAFF'), validateBody(flightUpdate), controller.updateFlight);
+router.put('/:id/status', auth(true), requireRoles('ADMIN', 'STAFF'), controller.updateFlightStatus);
 router.delete('/:id', auth(true), requireRoles('ADMIN'), controller.deleteFlight);
 
 module.exports = router;

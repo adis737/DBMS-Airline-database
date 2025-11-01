@@ -13,6 +13,12 @@ const bookingsRouter = require('./routes/bookings');
 const airportsRouter = require('./routes/airports');
 const staffRouter = require('./routes/staff');
 const analyticsRouter = require('./routes/analytics');
+const checkInRouter = require('./routes/checkin');
+const baggageRouter = require('./routes/baggage');
+const notificationsRouter = require('./routes/notifications');
+const reviewsRouter = require('./routes/reviews');
+const specialServicesRouter = require('./routes/specialServices');
+const aircraftRouter = require('./routes/aircraft');
 
 const app = express();
 
@@ -46,6 +52,12 @@ app.use('/api/bookings', bookingsRouter);
 app.use('/api/airports', airportsRouter);
 app.use('/api/staff', staffRouter);
 app.use('/api/analytics', analyticsRouter);
+app.use('/api/checkin', checkInRouter);
+app.use('/api/baggage', baggageRouter);
+app.use('/api/notifications', notificationsRouter);
+app.use('/api/reviews', reviewsRouter);
+app.use('/api/special-services', specialServicesRouter);
+app.use('/api/aircraft', aircraftRouter);
 
 app.use((req, res) => {
 	res.status(404).json({ error: 'Not Found' });

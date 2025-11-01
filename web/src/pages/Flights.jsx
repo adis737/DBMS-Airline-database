@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import api from '../api'
 import { generateTicketPDF } from '../ticket'
 import { addActivity } from '../activity'
+import FlightMap from '../components/FlightMap'
 
 export default function Flights() {
 	const [params, setParams] = useState({ date: '', origin: '', destination: '', page: 1, limit: 10 })
@@ -10,29 +11,38 @@ export default function Flights() {
 	const [error, setError] = useState('')
 	const [airports, setAirports] = useState([])
 	const [total, setTotal] = useState(0)
+	const [viewMode, setViewMode] = useState('list') // 'list' or 'map'
 
-	// Featured hardcoded flights with dynamic prices for demo
-	const [featured, setFeatured] = useState(()=>{
-		const today = new Date()
-		const fmt = (d)=> d.toISOString().slice(0,10)
-		return [
-			{ id:'FX100', airline:'Demo Air', flightNumber:'FX100', origin:'JFK', destination:'LAX', date: fmt(today), price: 199 },
-			{ id:'FX200', airline:'Sample Wings', flightNumber:'FX200', origin:'SFO', destination:'SEA', date: fmt(today), price: 89 },
-		]
-	})
+	// Featured flights from database
+	const [featured, setFeatured] = useState([])
 
 	useEffect(()=>{
-		const timer = setInterval(()=>{
-			setFeatured(list => list.map(f => {
-				// random small price drift, clamp to sensible bounds
-				const delta = Math.floor((Math.random()*9)-4) // -4..+4
-				const next = Math.min(599, Math.max(49, f.price + delta))
-				// keep date current each tick
+		// Load featured flights from database
+		(async()=>{
+			try {
 				const today = new Date().toISOString().slice(0,10)
-				return { ...f, price: next, date: today }
-			}))
-		}, 3000)
-		return ()=>clearInterval(timer)
+				const { data } = await api.get('/api/flights', { params: { date: today, limit: 2 } })
+				if (data.data && data.data.length > 0) {
+					const featured = data.data.slice(0, 2).map(f => {
+						const cheapestPrice = f.seatClasses && f.seatClasses.length > 0 
+							? Math.min(...f.seatClasses.map(s => s.price)) 
+							: null
+						return {
+							id: f._id,
+							airline: f.airline,
+							flightNumber: f.flightNumber,
+							origin: f.origin,
+							destination: f.destination,
+							date: new Date(f.departureTime).toISOString().slice(0,10),
+							price: cheapestPrice || 0
+						}
+					})
+					setFeatured(featured)
+				}
+			} catch (e) {
+				console.error('Failed to load featured flights:', e)
+			}
+		})()
 	}, [])
 
 useEffect(()=>{ (async()=>{
@@ -42,59 +52,24 @@ useEffect(()=>{ (async()=>{
 
 	const suggestions = useMemo(()=>airports.map(a=>a.code), [airports])
 
-	function generateFakeFlights() {
-		const baseDate = params.date || new Date().toISOString().slice(0,10)
-		const routes = [
-			['JFK','LAX'], ['SFO','SEA'], ['ORD','ATL'], ['MIA','BOS'], ['DFW','DEN'],
-			['LAX','SEA'], ['SEA','SFO'], ['ATL','MIA'], ['BOS','ORD'], ['DEN','DFW']
-		]
-		const airlines = ['Demo Air','Sample Wings','OpenSky','Nimbus','Falcon']
-		const makeIso = (h, m) => new Date(`${baseDate}T${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:00`).toISOString()
-		const rand = (min,max)=> Math.floor(Math.random()*(max-min+1))+min
-		const demo = Array.from({ length: 20 }).map((_, i) => {
-			const [o,d] = routes[i % routes.length]
-			const airline = airlines[i % airlines.length]
-			const basePrice = 79 + (i*7) + rand(-10, 25)
-			return {
-				_id: `DEMO-${i+1}`,
-				isDemo: true,
-				airline,
-				flightNumber: `${airline.split(' ')[0].slice(0,2).toUpperCase()}${100 + i}`,
-				origin: o,
-				destination: d,
-				departureTime: makeIso(6 + (i%12), (i*13)%60),
-				seatClasses: [
-					{ class: 'ECONOMY', availableSeats: 15 - (i%7), price: Math.max(59, Math.round(basePrice)) },
-					{ class: 'BUSINESS', availableSeats: 6 - (i%3), price: Math.round(basePrice * 1.65) }
-				]
-			}
-		})
-		// filter by current params
-		return demo.filter(d => {
-			if (params.origin && d.origin !== params.origin) return false
-			if (params.destination && d.destination !== params.destination) return false
-			if (params.date && new Date(d.departureTime).toISOString().slice(0,10) !== params.date) return false
-			return true
-		})
-	}
-
 	async function search() {
 		setLoading(true); setError('')
 		try {
 			const { data } = await api.get('/api/flights', { params })
-			let nextFlights = data.data
-			let nextTotal = data.total
-			if (!nextFlights || nextFlights.length === 0) {
-				nextFlights = generateFakeFlights()
-				nextTotal = nextFlights.length
+			setFlights(data.data || [])
+			setTotal(data.total || 0)
+			if (data.data && data.data.length === 0 && !params.date && !params.origin && !params.destination) {
+				setError('No flights available. Try running npm run seed to populate the database.')
 			}
-			setFlights(nextFlights); setTotal(nextTotal)
 		} catch (e) {
-			// On error, show fake flights instead of error message
-			const fakeFlights = generateFakeFlights()
-			setFlights(fakeFlights)
-			setTotal(fakeFlights.length)
-			setError('') // Clear error so fake flights are shown
+			console.error('Flight search error:', e)
+			if (e.code === 'ECONNREFUSED' || e.message.includes('Network Error')) {
+				setError('Cannot connect to server. Make sure the backend is running on port 3000.')
+			} else {
+				setError(e.response?.data?.error || e.message || 'Failed to load flights')
+			}
+			setFlights([])
+			setTotal(0)
 		}
 		finally { setLoading(false) }
 	}
@@ -168,11 +143,41 @@ useEffect(()=>{ (async()=>{
 	const totalPages = Math.max(1, Math.ceil(total / params.limit))
 
 	return (
-		<div style={{ maxWidth: 1000, margin: '20px auto', padding:'0 12px' }}>
+		<div style={{ maxWidth: 1400, margin: '20px auto', padding:'0 12px' }}>
+			<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
 			<h2>Find Flights</h2>
+				<div style={{ display: 'flex', gap: '8px' }}>
+					<button 
+						onClick={() => setViewMode('list')}
+						style={{ 
+							padding: '8px 16px', 
+							background: viewMode === 'list' ? '#007bff' : '#f0f0f0',
+							color: viewMode === 'list' ? 'white' : 'black',
+							border: 'none',
+							borderRadius: '4px',
+							cursor: 'pointer'
+						}}
+					>
+						List View
+					</button>
+					<button 
+						onClick={() => setViewMode('map')}
+						style={{ 
+							padding: '8px 16px', 
+							background: viewMode === 'map' ? '#007bff' : '#f0f0f0',
+							color: viewMode === 'map' ? 'white' : 'black',
+							border: 'none',
+							borderRadius: '4px',
+							cursor: 'pointer'
+						}}
+					>
+						Live Map
+					</button>
+				</div>
+			</div>
 			<div className="glass" style={{ padding:12, borderRadius:8, margin:'8px 0' }}>
 				<div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:8, flexWrap:'wrap', gap:8 }}>
-					<strong>Featured flights (live price demo)</strong>
+					<strong>Featured flights today</strong>
 					<span style={{ fontSize:'0.9rem', opacity:0.8 }}>Today: {new Date().toLocaleDateString()}</span>
 				</div>
 				<div style={{ display:'flex', gap:12, flexWrap:'wrap' }}>
@@ -202,20 +207,40 @@ useEffect(()=>{ (async()=>{
 				</select>
 			</div>
 			{error && <p style={{ color:'red' }}>{error}</p>}
+			
+			{viewMode === 'map' ? (
+				<div>
+					<h3 style={{ marginTop: '20px', marginBottom: '10px' }}>Live Flight Tracker</h3>
+					<p style={{ marginBottom: '10px', color: '#666' }}>
+						Real-time flight positions from AviationStack API. Map updates every 30 seconds.
+					</p>
+					<FlightMap />
+				</div>
+			) : (
+				<>
 			{!loading && flights.length === 0 && <p style={{ marginTop:12 }}>No flights found. Try clearing filters.</p>}
 			<table style={{ width:'100%', marginTop:12, borderCollapse:'collapse' }}>
-				<thead><tr><th align="left">Flight</th><th align="left">Airline</th><th align="left">Route</th><th align="left">Depart</th><th align="left">Seats</th><th></th></tr></thead>
+				<thead><tr><th align="left">Flight</th><th align="left">Airline</th><th align="left">Route</th><th align="left">Departure</th><th align="left">Arrival</th><th align="left">Price</th><th align="left">Seats</th><th></th></tr></thead>
 				<tbody>
-					{flights.map(f=> (
+					{flights.map(f=> {
+						const departTime = new Date(f.departureTime)
+						const arriveTime = new Date(f.arrivalTime)
+						const cheapestPrice = f.seatClasses && f.seatClasses.length > 0 
+							? Math.min(...f.seatClasses.map(s => s.price)) 
+							: null
+						return (
 						<tr key={f._id} style={{ borderTop:'1px solid rgba(0,0,0,0.1)' }}>
 							<td>{f.flightNumber}</td>
 							<td>{f.airline}</td>
 							<td>{f.origin} → {f.destination}</td>
-							<td>{new Date(f.departureTime).toLocaleString()}</td>
+								<td>{departTime.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</td>
+								<td>{arriveTime.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</td>
+								<td>{cheapestPrice ? `$${cheapestPrice}+` : 'N/A'}</td>
 							<td>{(f.seatClasses||[]).map(s=>`${s.class}:${s.availableSeats}`).join(' ')}</td>
 							<td><button onClick={()=>book(f)}>Book</button></td>
 						</tr>
-					))}
+						)
+					})}
 				</tbody>
 			</table>
 			<div style={{ display:'flex', justifyContent:'space-between', marginTop:12 }}>
@@ -223,6 +248,8 @@ useEffect(()=>{ (async()=>{
 				<span>Page {params.page} / {totalPages}</span>
 				<button disabled={params.page>=totalPages} onClick={()=>setParams(p=>({ ...p, page: p.page+1 }))}>Next</button>
 			</div>
+				</>
+			)}
 		</div>
 	)
 }

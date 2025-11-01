@@ -26,6 +26,10 @@ export default function Layout() {
 				<nav className={`nav${menuOpen ? ' open' : ''}`} style={{ display:'flex', gap:16, fontSize:'1.05rem', flexWrap:'wrap' }}>
 					<Link to="/flights" onClick={()=>setMenuOpen(false)}>Flights</Link>
 					{token && <Link to="/bookings" onClick={()=>setMenuOpen(false)}>My Bookings</Link>}
+					{token && <Link to="/checkin" onClick={()=>setMenuOpen(false)}>Check-In</Link>}
+					{token && <Link to="/baggage" onClick={()=>setMenuOpen(false)}>Baggage</Link>}
+					{token && <Link to="/notifications" onClick={()=>setMenuOpen(false)}>Notifications</Link>}
+					{token && <Link to="/reviews" onClick={()=>setMenuOpen(false)}>Reviews</Link>}
 					{token && <Link to="/history" onClick={()=>setMenuOpen(false)}>History</Link>}
 					{token && <Link to="/assistant" onClick={()=>setMenuOpen(false)}>Assistant</Link>}
 					{token && <Link to="/passenger" onClick={()=>setMenuOpen(false)}>Passenger</Link>}

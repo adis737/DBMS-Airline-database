@@ -19,7 +19,18 @@ const flightSchema = new mongoose.Schema(
 		departureTime: { type: Date, required: true, index: true },
 		arrivalTime: { type: Date, required: true },
 		seatClasses: { type: [seatClassSchema], default: [] },
-		status: { type: String, enum: ['SCHEDULED', 'DELAYED', 'CANCELLED', 'COMPLETED'], default: 'SCHEDULED' },
+		status: { type: String, enum: ['SCHEDULED', 'DELAYED', 'CANCELLED', 'COMPLETED', 'BOARDING', 'IN_FLIGHT', 'ARRIVED'], default: 'SCHEDULED' },
+		aircraft: { type: mongoose.Schema.Types.ObjectId, ref: 'Aircraft' },
+		gate: { type: String, trim: true },
+		terminal: { type: String, trim: true },
+		delayMinutes: { type: Number, default: 0 },
+		actualDepartureTime: { type: Date },
+		actualArrivalTime: { type: Date },
+		statusHistory: [{
+			status: { type: String },
+			timestamp: { type: Date, default: Date.now },
+			reason: { type: String }
+		}],
 	},
 	{ timestamps: true }
 );

@@ -10,8 +10,23 @@ async function createPassenger(req, res, next) {
 
 async function getPassengers(req, res, next) {
 	try {
-		const passengers = await Passenger.find().sort({ createdAt: -1 });
-		res.json(passengers);
+		const { page = 1, limit = 100 } = req.query;
+		const skip = (Number(page) - 1) * Number(limit);
+		
+		const passengers = await Passenger.find()
+			.sort({ createdAt: -1 })
+			.skip(skip)
+			.limit(Number(limit));
+		
+		const total = await Passenger.countDocuments();
+		
+		res.json({ 
+			data: passengers, 
+			total, 
+			page: Number(page), 
+			limit: Number(limit),
+			totalPages: Math.ceil(total / Number(limit))
+		});
 	} catch (err) { next(err); }
 }
 

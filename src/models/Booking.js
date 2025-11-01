@@ -19,6 +19,9 @@ const bookingSchema = new mongoose.Schema(
 		passenger: { type: mongoose.Schema.Types.ObjectId, ref: 'Passenger', required: true, index: true },
 		seatClass: { type: String, enum: ['ECONOMY', 'BUSINESS', 'FIRST'], required: true },
 		seatNumber: { type: String, trim: true },
+		seatRow: { type: Number },
+		seatLetter: { type: String, trim: true },
+		preferredSeatType: { type: String, enum: ['WINDOW', 'AISLE', 'MIDDLE'], trim: true },
 		status: { type: String, enum: ['CONFIRMED', 'CANCELLED'], default: 'CONFIRMED' },
 		payment: { type: paymentSchema, required: true },
 		travelDate: { type: Date, required: true, index: true },
@@ -29,6 +32,9 @@ const bookingSchema = new mongoose.Schema(
 bookingSchema.pre('save', function generateBookingId(next) {
 	if (!this.bookingId) {
 		this.bookingId = `BKG-${crypto.randomBytes(6).toString('hex').toUpperCase()}`;
+	}
+	if (this.seatLetter) {
+		this.seatLetter = this.seatLetter.toUpperCase();
 	}
 	next();
 });

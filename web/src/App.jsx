@@ -9,6 +9,10 @@ import Profile from './pages/Profile'
 import History from './pages/History'
 import Assistant from './pages/Assistant'
 import Admin from './pages/Admin'
+import CheckIn from './pages/CheckIn'
+import Baggage from './pages/Baggage'
+import Notifications from './pages/Notifications'
+import Reviews from './pages/Reviews'
 import './App.css'
 
 function RequireAuth({ children }) {
@@ -26,6 +30,10 @@ export default function App() {
 					<Route path="/login" element={<Login />} />
 					<Route path="/flights" element={<Flights />} />
 					<Route path="/bookings" element={<RequireAuth><Bookings /></RequireAuth>} />
+					<Route path="/checkin" element={<CheckIn />} />
+					<Route path="/baggage" element={<Baggage />} />
+					<Route path="/notifications" element={<Notifications />} />
+					<Route path="/reviews" element={<Reviews />} />
 					<Route path="/history" element={<History />} />
 					<Route path="/assistant" element={<Assistant />} />
 					<Route path="/admin" element={<Admin />} />

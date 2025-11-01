@@ -29,10 +29,10 @@ const flightUpdate = Joi.object({
 }).min(1);
 
 const flightQuery = Joi.object({
-	date: Joi.date().iso(),
-	airline: Joi.string().trim(),
-	origin: Joi.string().trim().uppercase().length(3),
-	destination: Joi.string().trim().uppercase().length(3),
+	date: Joi.string().allow(''),
+	airline: Joi.string().allow(''),
+	origin: Joi.string().uppercase().max(3).allow(''),
+	destination: Joi.string().uppercase().max(3).allow(''),
 	page: Joi.number().integer().min(1).default(1),
 	limit: Joi.number().integer().min(1).max(200).default(20),
 });
