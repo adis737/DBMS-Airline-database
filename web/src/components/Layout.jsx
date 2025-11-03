@@ -45,7 +45,7 @@ export default function Layout() {
 					)}
 				</div>
 			</header>
-			<div style={{ height:'var(--header-h, 72px)' }} />
+			<div style={{ height:'calc(var(--header-h, 72px) + var(--header-gap, 20px))' }} />
 			<main style={{ maxWidth: 1280, margin: '0 auto', padding:'0 12px' }}>
 				<div className="page-enter" key={location.pathname}>
 					<Outlet />
