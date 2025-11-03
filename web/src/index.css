@@ -193,6 +193,7 @@ input, select, textarea {
   background: var(--input-bg);
   color: var(--input-text);
   font-size: 1.05rem;
+  text-align: center;
 }
 
 input::placeholder, textarea::placeholder { color: var(--input-placeholder); }
