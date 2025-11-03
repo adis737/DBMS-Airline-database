@@ -14,7 +14,7 @@ export default function Layout() {
 	}
 	return (
 		<div>
-			<header className="glass" style={{ display:'flex', gap:16, alignItems:'center', padding:'16px 20px', position:'fixed', top:0, left:0, right:0, width:'100%', zIndex:20, flexWrap:'wrap' }}>
+			<header className="glass" style={{ display:'flex', gap:16, alignItems:'center', padding:'16px 20px', position:'fixed', top:'var(--header-gap, 12px)', left:'var(--header-gap, 12px)', right:'var(--header-gap, 12px)', zIndex:20, flexWrap:'wrap' }}>
 				<Link to="/get-started" style={{ display:'flex', alignItems:'center', gap:10, textDecoration:'none' }}>
 					<img src={logoImage} alt="Aether Aviation Logo" style={{ height: 40, width: 'auto' }} />
 					<span style={{ fontWeight: 800, fontSize: '1.25rem' }} className="gradient-text">Aether Aviation</span>
