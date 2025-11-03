@@ -1,5 +1,5 @@
 import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import logoImage from '../assets/—Pngtree—large passenger airplane flying through_20686786.png'
 
 export default function Layout() {
@@ -7,6 +7,12 @@ export default function Layout() {
 	const location = useLocation()
 	const [menuOpen, setMenuOpen] = useState(false)
 	const token = localStorage.getItem('token')
+	const [theme, setTheme] = useState(() => localStorage.getItem('theme') || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'))
+
+	useEffect(() => {
+		document.documentElement.setAttribute('data-theme', theme)
+		localStorage.setItem('theme', theme)
+	}, [theme])
 	function logout() {
 		localStorage.removeItem('token')
 		navigate('/get-started')
@@ -37,7 +43,10 @@ export default function Layout() {
 					{token && <Link to="/profile" onClick={()=>setMenuOpen(false)}>Profile</Link>}
 					<Link to="/admin" onClick={()=>setMenuOpen(false)}>Admin</Link>
 				</nav>
-				<div style={{ marginLeft:'auto' }}>
+				<div style={{ marginLeft:'auto', display:'flex', gap:8, alignItems:'center' }}>
+					<button onClick={()=>setTheme(t=> t==='dark' ? 'light' : 'dark')} title="Toggle theme" aria-label="Toggle theme">
+						{theme==='dark' ? '🌙' : '🌞'}
+					</button>
 					{token ? (
 						<button onClick={logout}>Logout</button>
 					) : (
