@@ -65,7 +65,7 @@ export default function CheckIn() {
 	const checkedInMap = new Map(checkIns.map(ci => [ci.booking?._id || ci.booking, ci]))
 
 	return (
-		<div style={{ maxWidth: 1000, margin: '20px auto', padding: '0 12px' }}>
+		<div style={{ maxWidth: 1200, margin: '20px auto', padding: '0 12px' }}>
 			<h2>Online Check-In</h2>
 			{error && <p style={{ color: 'red' }}>{error}</p>}
 			
