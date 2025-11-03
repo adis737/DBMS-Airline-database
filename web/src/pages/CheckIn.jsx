@@ -95,12 +95,12 @@ export default function CheckIn() {
 										<p><strong>Date:</strong> {flightDate.toLocaleString()}</p>
 										<p><strong>Seat Class:</strong> {booking.seatClass}</p>
 										{checkIn && (
-											<div style={{ marginTop: '12px', padding: '12px', background: '#fff', borderRadius: '4px' }}>
+											<div className="checkin-details" style={{ marginTop: '12px', padding: '12px', borderRadius: '8px' }}>
 												<p><strong>✓ Checked In</strong></p>
 												<p>Seat: {checkIn.seatNumber || 'TBD'}</p>
 												<p>Gate: {checkIn.gate || 'TBD'}</p>
 												<p>Boarding Group: {checkIn.boardingGroup}</p>
-												<p style={{ fontSize: '12px', color: '#666' }}>
+												<p className="review-meta" style={{ fontSize: '12px' }}>
 													Checked in at: {new Date(checkIn.checkInTime).toLocaleString()}
 												</p>
 											</div>

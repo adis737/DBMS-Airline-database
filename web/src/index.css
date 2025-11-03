@@ -123,6 +123,7 @@ section, header, footer, aside, .card {
 /* Check-in cards */
 .checkin-card { border: 1px solid var(--glass-border); }
 .checkin-card.checked-in { background: var(--success-tint) !important; border-color: rgba(16,185,129,0.35) !important; }
+.checkin-details { background: var(--glass-bg); border: 1px solid var(--glass-border); }
 
 body {
   margin: 0;
