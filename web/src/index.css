@@ -52,6 +52,21 @@ a {
 }
 a:hover { color: #1d4ed8; }
 
+/* Page transitions */
+@keyframes pageFadeInUp {
+  from { opacity: 0; transform: translateY(10px) scale(0.995); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.page-enter {
+  animation: pageFadeInUp 420ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform, opacity;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-enter { animation: none; }
+}
+
 /* Darken common containers that may not have .glass */
 section, header, footer, aside, .card {
   background: transparent;

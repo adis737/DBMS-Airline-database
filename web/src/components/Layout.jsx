@@ -1,9 +1,10 @@
-import { Link, Outlet, useNavigate } from 'react-router-dom'
+import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { useState } from 'react'
 import logoImage from '../assets/—Pngtree—large passenger airplane flying through_20686786.png'
 
 export default function Layout() {
 	const navigate = useNavigate()
+	const location = useLocation()
 	const [menuOpen, setMenuOpen] = useState(false)
 	const token = localStorage.getItem('token')
 	function logout() {
@@ -45,7 +46,9 @@ export default function Layout() {
 				</div>
 			</header>
 			<main style={{ maxWidth: 1280, margin: '0 auto', padding:'0 12px' }}>
-				<Outlet />
+				<div className="page-enter" key={location.pathname}>
+					<Outlet />
+				</div>
 			</main>
 		</div>
 	)
