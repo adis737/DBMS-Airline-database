@@ -102,13 +102,7 @@ export default function Baggage() {
 			</div>
 
 			{showForm && (
-				<form onSubmit={handleSubmit} style={{ 
-					border: '1px solid #ddd', 
-					borderRadius: '8px', 
-					padding: '20px', 
-					marginBottom: '20px',
-					background: '#f9f9f9'
-				}}>
+				<form onSubmit={handleSubmit} className="glass" style={{ padding: '20px', marginBottom: '20px' }}>
 					<h3>Register New Baggage</h3>
 					<div style={{ display: 'grid', gap: '12px' }}>
 						<label>
@@ -192,10 +186,9 @@ export default function Baggage() {
 			{!loading && baggages.length > 0 && (
 				<div style={{ display: 'grid', gap: '16px' }}>
 					{baggages.map(bag => (
-						<div key={bag._id} style={{ 
-							border: '1px solid #ddd', 
-							borderRadius: '8px', 
-							padding: '16px',
+						<div key={bag._id} className="glass" style={{ 
+							padding: '18px',
+							borderRadius: '16px',
 							borderLeft: `4px solid ${statusColors[bag.status] || '#999'}`
 						}}>
 							<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
@@ -205,7 +198,7 @@ export default function Baggage() {
 										padding: '4px 8px', 
 										background: statusColors[bag.status] || '#999',
 										color: 'white',
-										borderRadius: '4px',
+										borderRadius: '9999px',
 										fontSize: '12px'
 									}}>{bag.status}</span></p>
 									<p><strong>Type:</strong> {bag.type}</p>
