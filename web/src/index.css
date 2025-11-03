@@ -133,6 +133,29 @@ section, header, footer, aside, .card {
 .checkin-card.checked-in { background: var(--success-tint) !important; border-color: rgba(16,185,129,0.35) !important; }
 .checkin-details { background: var(--glass-bg); border: 1px solid var(--glass-border); }
 
+/* Featured flight cards */
+.featured-card {
+  position: relative;
+  border-radius: 14px;
+  padding: 14px 14px 14px 20px; /* room for left band */
+  transition: transform .15s ease, box-shadow .25s ease, border-color .25s ease;
+}
+.featured-card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 6px;
+  background: linear-gradient(180deg, var(--grad1), var(--grad2));
+  border-top-left-radius: 14px;
+  border-bottom-left-radius: 14px;
+}
+.featured-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 40px rgba(0,0,0,0.12);
+}
+
 body {
   margin: 0;
   min-width: 320px;

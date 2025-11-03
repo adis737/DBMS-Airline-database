@@ -182,7 +182,7 @@ useEffect(()=>{ (async()=>{
 				</div>
 				<div style={{ display:'flex', gap:12, flexWrap:'wrap' }}>
 					{featured.map(f => (
-						<div key={f.id} className="glass" style={{ borderRadius:12, padding:12, minWidth:240, flex: '1 1 280px', maxWidth:'100%' }}>
+						<div key={f.id} className="glass featured-card" style={{ minWidth:240, flex: '1 1 280px', maxWidth:'100%' }}>
 							<div style={{ fontWeight:600 }}>{f.airline} · {f.flightNumber}</div>
 							<div style={{ margin:'4px 0' }}>{f.origin} → {f.destination}</div>
 							<div style={{ margin:'4px 0' }}>Date: {f.date}</div>
