@@ -160,6 +160,8 @@ thead th { background: rgba(0,0,0,0.03); font-weight: 600; }
   .hamburger { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 10px; background: rgba(255,255,255,0.9); }
   .nav { display: none !important; }
   .nav.open { display: flex !important; flex-direction: column; width: 100%; gap: 10px; padding-top: 8px; }
+  /* Admin analytics grid stacks on small screens */
+  .admin-analytics-grid { grid-template-columns: 1fr !important; }
 }
 
 @media (max-width: 480px) {

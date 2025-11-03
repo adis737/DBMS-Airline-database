@@ -347,8 +347,8 @@ export default function Admin() {
 					</button>
 				</div>
 				{analyticsLoading ? <p>Loading analytics...</p> : (
-					<div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: 20 }}>
-						<div>
+					<div className="admin-analytics-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 20 }}>
+						<div className="glass" style={{ minHeight: 300, padding: 16 }}>
 							<h4>Net Revenue</h4>
 							{(() => {
 								const histExp = calculateHistoryExpenses()
@@ -356,7 +356,7 @@ export default function Admin() {
 								const net = dbRevenue + histExp.totalExpense
 								return (
 									<>
-										<p style={{ fontSize: '2rem', fontWeight: 'bold', color: net >= 0 ? '#10b981' : '#ef4444' }}>
+										<p style={{ fontSize: '2rem', fontWeight: 'bold', color: net >= 0 ? '#10b981' : '#ef4444', margin: '8px 0 4px' }}>
 											${net.toLocaleString()}
 										</p>
 										<p style={{ fontSize: '0.9rem', opacity: 0.8 }}>
