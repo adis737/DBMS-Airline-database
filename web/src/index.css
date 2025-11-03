@@ -11,6 +11,10 @@
   --text: rgba(15,23,42,0.92);
   --muted-text: rgba(0,0,0,0.55);
   --success-tint: #e8f5e9;
+  --input-bg: rgba(255,255,255,0.92);
+  --input-text: #0f172a;
+  --input-border: rgba(0,0,0,0.15);
+  --input-placeholder: rgba(0,0,0,0.5);
 
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.6;
@@ -40,6 +44,10 @@
   --text: rgba(241,245,249,0.95);
   --muted-text: rgba(203,213,225,0.75);
   --success-tint: rgba(16,185,129,0.28);
+  --input-bg: rgba(17,24,39,0.92);
+  --input-text: #eef2ff;
+  --input-border: rgba(255,255,255,0.15);
+  --input-placeholder: rgba(203,213,225,0.6);
 }
 
 /* Glass utilities */
@@ -154,14 +162,16 @@ button:active { transform: translateY(1px); }
 button:focus, button:focus-visible { outline: 4px auto -webkit-focus-ring-color; }
 
 /* Bigger inputs/selects */
-input, select {
+input, select, textarea {
   padding: 0.65em 0.8em;
   border-radius: 10px;
-  border: 1px solid rgba(0,0,0,0.15);
-  background: rgba(255,255,255,0.9);
-  color: var(--text);
+  border: 1px solid var(--input-border);
+  background: var(--input-bg);
+  color: var(--input-text);
   font-size: 1.05rem;
 }
+
+input::placeholder, textarea::placeholder { color: var(--input-placeholder); }
 
 /* Table spacing */
 table { font-size: 1.05rem; width: 100%; }
