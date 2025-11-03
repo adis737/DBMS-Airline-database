@@ -75,6 +75,32 @@ section, header, footer, aside, .card {
   color: var(--text);
 }
 
+/* Reviews page */
+.review-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+@media (min-width: 640px) {
+  .review-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (min-width: 1024px) {
+  .review-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+.review-card {
+  padding: 16px 18px;
+  border-radius: 16px;
+  transition: transform .15s ease, box-shadow .25s ease, border-color .25s ease;
+}
+.review-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 40px rgba(0,0,0,0.12);
+}
+.review-card h4 { margin: 0 0 6px 0; }
+.review-stars { color: #f59e0b; }
+.review-meta { font-size: 12px; color: rgba(0,0,0,0.55); margin-top: 8px; }
+
 body {
   margin: 0;
   min-width: 320px;
@@ -125,7 +151,7 @@ thead th { background: rgba(0,0,0,0.03); font-weight: 600; }
   h2 { font-size: 1.5rem; }
   body { font-size: 16px; }
   header { padding: 12px 16px !important; }
-  header nav { gap: 12px; font-size: 1.1rem; }
+  header nav { gap: 12px; font-size: 0.95rem; }
   main { padding: 0 8px !important; }
   .glass { padding: 16px 20px !important; border-radius: 16px; }
   table { font-size: 0.9rem; }

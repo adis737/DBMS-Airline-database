@@ -64,13 +64,7 @@ export default function Reviews() {
 			</div>
 
 			{showForm && (
-				<form onSubmit={handleSubmit} style={{ 
-					border: '1px solid #ddd', 
-					borderRadius: '8px', 
-					padding: '20px', 
-					marginBottom: '20px',
-					background: '#f9f9f9'
-				}}>
+				<form onSubmit={handleSubmit} className="glass review-form" style={{ marginBottom: '20px' }}>
 					<h3>Write a Review</h3>
 					<div style={{ display: 'grid', gap: '12px' }}>
 						<label>
@@ -94,7 +88,7 @@ export default function Reviews() {
 									<option key={r} value={r}>{r} {r === 1 ? 'star' : 'stars'}</option>
 								))}
 							</select>
-							<span style={{ marginLeft: '8px', color: '#FFD700' }}>{renderStars(formData.rating)}</span>
+							<span className="review-stars" style={{ marginLeft: '8px' }}>{renderStars(formData.rating)}</span>
 						</label>
 						<label>
 							Title <input 
@@ -121,24 +115,20 @@ export default function Reviews() {
 				<p>No reviews yet. Be the first to review!</p>
 			)}
 
-			{!loading && reviews.length > 0 && (
-				<div style={{ display: 'grid', gap: '16px' }}>
+				{!loading && reviews.length > 0 && (
+					<div className="review-grid">
 					{reviews.map(review => (
-						<div key={review._id} style={{ 
-							border: '1px solid #ddd', 
-							borderRadius: '8px', 
-							padding: '16px' 
-						}}>
+							<div key={review._id} className="glass review-card">
 							<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
 								<div>
 									<h4>{review.title || 'Review'}</h4>
-									<p style={{ color: '#FFD700', fontSize: '20px', margin: '8px 0' }}>
+										<p className="review-stars" style={{ fontSize: '20px', margin: '8px 0' }}>
 										{renderStars(review.rating)}
 									</p>
 									<p><strong>Flight:</strong> {review.flight?.flightNumber || review.airline}</p>
 									<p><strong>Route:</strong> {review.flight?.origin} → {review.flight?.destination}</p>
 									<p>{review.comments}</p>
-									<p style={{ fontSize: '12px', color: '#666' }}>
+										<p className="review-meta">
 										By {review.passenger?.firstName} {review.passenger?.lastName} • {new Date(review.createdAt).toLocaleDateString()}
 									</p>
 								</div>
