@@ -84,10 +84,9 @@ export default function CheckIn() {
 						const flightDetails = (typeof booking.flight === 'string' || typeof booking.flight === 'number') ? flightsMap[booking.flight] : booking.flight
 						
 						return (
-							<div key={booking._id} className="glass" style={{ 
+							<div key={booking._id} className={`glass checkin-card${checkIn ? ' checked-in' : ''}`} style={{ 
 								borderRadius: '12px', 
-								padding: '20px',
-								background: checkIn ? 'var(--success-tint)' : 'var(--glass-bg)'
+								padding: '20px'
 							}}>
 								<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
 									<div>
