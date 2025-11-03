@@ -1,5 +1,5 @@
 import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import logoImage from '../assets/—Pngtree—large passenger airplane flying through_20686786.png'
 
 export default function Layout() {
@@ -8,11 +8,30 @@ export default function Layout() {
 	const [menuOpen, setMenuOpen] = useState(false)
 	const token = localStorage.getItem('token')
 	const [theme, setTheme] = useState(() => localStorage.getItem('theme') || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'))
+	const headerRef = useRef(null)
 
 	useEffect(() => {
 		document.documentElement.setAttribute('data-theme', theme)
 		localStorage.setItem('theme', theme)
 	}, [theme])
+
+	useEffect(() => {
+		function updateHeaderHeight() {
+			if (!headerRef.current) return
+			const h = headerRef.current.offsetHeight
+			document.documentElement.style.setProperty('--header-h', h + 'px')
+		}
+		updateHeaderHeight()
+		const ro = new ResizeObserver(updateHeaderHeight)
+		const el = headerRef.current
+		if (el) ro.observe(el)
+		window.addEventListener('resize', updateHeaderHeight)
+		return () => {
+			window.removeEventListener('resize', updateHeaderHeight)
+			if (el) ro.unobserve(el)
+			ro.disconnect()
+		}
+	}, [menuOpen])
 	function logout() {
 		localStorage.removeItem('token')
 		navigate('/get-started')
@@ -20,7 +39,7 @@ export default function Layout() {
 	}
 	return (
 		<div>
-			<header className="glass" style={{ display:'flex', gap:16, alignItems:'center', padding:'16px 20px', position:'fixed', top:'var(--header-gap, 12px)', left:'var(--header-gap, 12px)', right:'var(--header-gap, 12px)', zIndex:20, flexWrap:'wrap' }}>
+			<header ref={headerRef} className="glass" style={{ display:'flex', gap:16, alignItems:'center', padding:'16px 20px', position:'fixed', top:'var(--header-gap, 12px)', left:'var(--header-gap, 12px)', right:'var(--header-gap, 12px)', zIndex:20, flexWrap:'wrap' }}>
 				<Link to="/get-started" style={{ display:'flex', alignItems:'center', gap:10, textDecoration:'none' }}>
 					<img src={logoImage} alt="Aether Aviation Logo" style={{ height: 40, width: 'auto' }} />
 					<span style={{ fontWeight: 800, fontSize: '1.25rem' }} className="gradient-text">Aether Aviation</span>
