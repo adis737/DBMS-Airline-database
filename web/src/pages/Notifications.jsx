@@ -74,10 +74,14 @@ export default function Notifications() {
 				}}>{unreadCount}</span>}</h2>
 				<div style={{ display: 'flex', gap: '8px' }}>
 					<button onClick={() => setFilter('all')} style={{ 
-						background: filter === 'all' ? '#007bff' : '#f0f0f0' 
+						background: filter === 'all' ? '#007bff' : 'var(--glass-bg)',
+						color: filter === 'all' ? '#fff' : 'var(--text)',
+						border: '1px solid var(--glass-border)'
 					}}>All</button>
 					<button onClick={() => setFilter('unread')} style={{ 
-						background: filter === 'unread' ? '#007bff' : '#f0f0f0' 
+						background: filter === 'unread' ? '#007bff' : 'var(--glass-bg)',
+						color: filter === 'unread' ? '#fff' : 'var(--text)',
+						border: '1px solid var(--glass-border)'
 					}}>Unread</button>
 					<button onClick={markAllAsRead}>Mark All Read</button>
 				</div>
