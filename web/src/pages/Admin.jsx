@@ -260,7 +260,7 @@ export default function Admin() {
 	const hasAdminAccess = userRoles.includes('ADMIN') || userRoles.includes('STAFF')
 
 	return (
-		<div style={{ maxWidth: 1400, margin: '20px auto', padding: '0 12px' }}>
+		<div style={{ maxWidth: 1600, margin: '20px auto', padding: '0 12px' }}>
 			<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, flexWrap: 'wrap', gap: '12px' }}>
 				<div>
 					<h2>Admin Dashboard</h2>
@@ -347,8 +347,8 @@ export default function Admin() {
 					</button>
 				</div>
 				{analyticsLoading ? <p>Loading analytics...</p> : (
-					<div className="admin-analytics-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 20 }}>
-						<div className="glass" style={{ minHeight: 300, padding: 16 }}>
+					<div className="admin-analytics-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(520px, 1fr))', gap: 24 }}>
+						<div className="glass" style={{ minHeight: 360, padding: 20 }}>
 							<h4>Net Revenue</h4>
 							{(() => {
 								const histExp = calculateHistoryExpenses()
@@ -366,7 +366,7 @@ export default function Admin() {
 								)
 							})()}
 						</div>
-						<div className="glass" style={{ minHeight: 300, padding: 16 }}>
+						<div className="glass" style={{ minHeight: 360, padding: 20 }}>
 							<h4>Most Booked Flights</h4>
 							{analytics.mostBooked && analytics.mostBooked.length > 0 ? (
 								<div style={{ width: '100%', height: 250 }}>
@@ -390,7 +390,7 @@ export default function Admin() {
 								</div>
 							)}
 						</div>
-						<div className="glass" style={{ minHeight: 300, padding: 16 }}>
+						<div className="glass" style={{ minHeight: 360, padding: 20 }}>
 							<h4>Flights Per Route</h4>
 							{analytics.routes && analytics.routes.length > 0 ? (
 								<div style={{ width: '100%', height: 250 }}>
@@ -424,7 +424,7 @@ export default function Admin() {
 								</div>
 							)}
 						</div>
-						<div className="glass" style={{ minHeight: 300, padding: 16 }}>
+						<div className="glass" style={{ minHeight: 360, padding: 20 }}>
 							<h4>Top Frequent Flyers</h4>
 							{analytics.flyers && analytics.flyers.length > 0 ? (
 								<div style={{ width: '100%', height: 250 }}>
