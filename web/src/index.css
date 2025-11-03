@@ -151,6 +151,7 @@ section, header, footer, aside, .card {
   border-top-left-radius: 14px;
   border-bottom-left-radius: 14px;
 }
+.featured-card.red::before { background: linear-gradient(180deg, #ef4444, #f97316); }
 .featured-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 16px 40px rgba(0,0,0,0.12);

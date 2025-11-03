@@ -181,8 +181,8 @@ useEffect(()=>{ (async()=>{
 					<span style={{ fontSize:'0.9rem', opacity:0.8 }}>Today: {new Date().toLocaleDateString()}</span>
 				</div>
 				<div style={{ display:'flex', gap:12, flexWrap:'wrap' }}>
-					{featured.map(f => (
-						<div key={f.id} className="glass featured-card" style={{ minWidth:240, flex: '1 1 280px', maxWidth:'100%' }}>
+					{featured.map((f, idx) => (
+						<div key={f.id} className={`glass featured-card${idx===0 ? ' red' : ''}`} style={{ minWidth:240, flex: '1 1 280px', maxWidth:'100%' }}>
 							<div style={{ fontWeight:600 }}>{f.airline} · {f.flightNumber}</div>
 							<div style={{ margin:'4px 0' }}>{f.origin} → {f.destination}</div>
 							<div style={{ margin:'4px 0' }}>Date: {f.date}</div>
