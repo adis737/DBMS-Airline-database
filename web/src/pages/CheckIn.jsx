@@ -6,6 +6,7 @@ export default function CheckIn() {
 	const [loading, setLoading] = useState(false)
 	const [error, setError] = useState('')
 	const [checkIns, setCheckIns] = useState([])
+	const [flightsMap, setFlightsMap] = useState({})
 
 	useEffect(() => {
 		loadData()
@@ -25,8 +26,24 @@ export default function CheckIn() {
 				api.get('/api/checkin', { params: { passengerId } })
 			])
 
-			setBookings((bookingsRes.data.data || bookingsRes.data || []).filter(b => b.status === 'CONFIRMED'))
+			const apiBookings = bookingsRes.data?.data || bookingsRes.data || []
+			const localDemo = JSON.parse(localStorage.getItem('demoBookings') || '[]')
+			const localSaved = JSON.parse(localStorage.getItem('savedBookings') || '[]')
+			const all = [...localSaved, ...localDemo, ...apiBookings]
+			const confirmed = all.filter(b => b.status === 'CONFIRMED')
+			setBookings(confirmed)
 			setCheckIns(checkInsRes.data || [])
+
+			// Build flights map for route display
+			const uniqueFlightIds = [...new Set(confirmed.map(b => b.flight).filter(id => typeof id === 'string' || typeof id === 'number'))]
+			if (uniqueFlightIds.length) {
+				const entries = await Promise.all(uniqueFlightIds.map(async (id) => {
+					try { const f = await api.get(`/api/flights/${id}`); return [id, f.data] } catch { return [id, null] }
+				}))
+				setFlightsMap(Object.fromEntries(entries))
+			} else {
+				setFlightsMap({})
+			}
 		} catch (e) {
 			setError(e.response?.data?.error || e.message)
 		} finally {
@@ -64,6 +81,7 @@ export default function CheckIn() {
 						const checkIn = checkedInMap.get(booking._id)
 						const flightDate = new Date(booking.travelDate || booking.flight?.departureTime)
 						const canCheckIn = flightDate && new Date(flightDate.getTime() - 24 * 60 * 60 * 1000) <= new Date()
+						const flightDetails = (typeof booking.flight === 'string' || typeof booking.flight === 'number') ? flightsMap[booking.flight] : booking.flight
 						
 						return (
 							<div key={booking._id} style={{ 
@@ -74,8 +92,8 @@ export default function CheckIn() {
 							}}>
 								<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
 									<div>
-										<h3>{booking.flight?.flightNumber || 'N/A'} - {booking.flight?.airline || 'N/A'}</h3>
-										<p><strong>Route:</strong> {booking.flight?.origin || booking.origin} → {booking.flight?.destination || booking.destination}</p>
+										<h3>{flightDetails?.flightNumber || booking.flight || 'N/A'}{flightDetails?.airline ? ` - ${flightDetails.airline}` : ''}</h3>
+										<p><strong>Route:</strong> {flightDetails?.origin || booking.origin || '—'} → {flightDetails?.destination || booking.destination || '—'}</p>
 										<p><strong>Date:</strong> {flightDate.toLocaleString()}</p>
 										<p><strong>Seat Class:</strong> {booking.seatClass}</p>
 										{checkIn && (
