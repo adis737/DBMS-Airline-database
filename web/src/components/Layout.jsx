@@ -25,12 +25,10 @@ export default function Layout() {
 					<img src={logoImage} alt="Aether Aviation Logo" style={{ height: 40, width: 'auto' }} />
 					<span style={{ fontWeight: 800, fontSize: '1.25rem' }} className="gradient-text">Aether Aviation</span>
 				</Link>
-				{(token || localStorage.getItem('adminAuth') === 'true') && (
-					<button className="hamburger" aria-label="Toggle navigation" onClick={()=>setMenuOpen(o=>!o)} style={{ border:'1px solid rgba(0,0,0,0.15)' }}>
-						☰
-					</button>
-				)}
-				<nav className={`nav${menuOpen ? ' open' : ''}`} style={{ display:'flex', gap:16, fontSize:'1.05rem', flexWrap:'wrap' }}>
+				<button className="hamburger" aria-label="Toggle navigation" onClick={()=>setMenuOpen(o=>!o)} style={{ border:'1px solid rgba(0,0,0,0.15)' }}>
+					☰
+				</button>
+				<nav className={`nav${menuOpen ? ' open' : ''}`} style={{ display:'flex', gap:16, fontSize:'0.95rem', flexWrap:'wrap' }}>
 					<Link to="/flights" onClick={()=>setMenuOpen(false)}>Flights</Link>
 					{token && <Link to="/bookings" onClick={()=>setMenuOpen(false)}>My Bookings</Link>}
 					{token && <Link to="/checkin" onClick={()=>setMenuOpen(false)}>Check-In</Link>}
