@@ -125,7 +125,7 @@ thead th { background: rgba(0,0,0,0.03); font-weight: 600; }
   h2 { font-size: 1.5rem; }
   body { font-size: 16px; }
   header { padding: 12px 16px !important; }
-  header nav { gap: 12px; font-size: 0.95rem; }
+  header nav { gap: 12px; font-size: 1.1rem; }
   main { padding: 0 8px !important; }
   .glass { padding: 16px 20px !important; border-radius: 16px; }
   table { font-size: 0.9rem; }
