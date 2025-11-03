@@ -63,7 +63,7 @@ export default function Notifications() {
 	}
 
 	return (
-		<div style={{ maxWidth: 800, margin: '20px auto', padding: '0 12px' }}>
+		<div style={{ maxWidth: 800, margin: '8px auto 20px', padding: '0 12px' }}>
 			<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
 				<h2>Notifications {unreadCount > 0 && <span style={{ 
 					background: '#f44336', 
